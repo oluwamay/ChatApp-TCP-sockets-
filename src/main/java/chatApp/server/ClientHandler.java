@@ -1,4 +1,4 @@
-package chatApp;
+package chatApp.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class ClientHandler implements Runnable {
             clientHandlers.add(this);
             broadcastMessage(clientUsername + " joined chat");
         } catch (IOException e) {
-            e.printStackTrace();
+            close(socket, bufferedReader, printWriter);
         }
     }
 
@@ -36,10 +36,14 @@ public class ClientHandler implements Runnable {
                 //the ".readline()" method will block every other code from executing until it is executed,
                 //Hence it has to be on its thread, so it won't block other clients from executing
                 messageFromClient = bufferedReader.readLine();
+                if(messageFromClient == null){
+                    removeClientHandler();
+                    break;
+                }
                 broadcastMessage(messageFromClient);
             } catch (IOException e) {
                //If an exception is thrown, the socket and buffered reader would be closed
-               close(socket, bufferedReader);
+               close(socket, bufferedReader, printWriter);
                break;
             }
         }
@@ -57,12 +61,13 @@ public class ClientHandler implements Runnable {
     clientHandlers.remove(this);
     broadcastMessage(this.clientUsername +" has left the chat");
     }
-    public void close(Socket socket, BufferedReader bufferedReader){
+    public void close(Socket socket, BufferedReader bufferedReader, PrintWriter printWriter){
        //this method is used to close the socket and streams of a disconnected client handler
        removeClientHandler();
         try{
            if(socket !=  null){ socket.close();}
            if(bufferedReader != null){ bufferedReader.close();}
+           if(printWriter != null){printWriter.close();}
         }catch(IOException e){
             e.printStackTrace();
         }

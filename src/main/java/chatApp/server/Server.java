@@ -1,4 +1,4 @@
-package chatApp;
+package chatApp.server;
 
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class Server {
     public void startServer()  {
        try{
            while(!serverSocket.isClosed()){
-               //server socket establishes connection with an instance of a client socket
+
                System.out.println("waiting for client connection...");
                Socket socket = serverSocket.accept();
                System.out.println("A new client has connected");
@@ -28,24 +28,23 @@ public class Server {
                pool.shutdown();
            }
        }catch(IOException e){
-            if(serverSocket != null){
-                try{
-                    serverSocket.close();
-                }catch(IOException ex){
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
+           closeServer();
        }
+    }
+
+    private void closeServer() {
+        if(serverSocket != null){
+            try{
+                serverSocket.close();
+            }catch(IOException ex){
+                ex.printStackTrace();
+            }
+        }
     }
 
     public static int getPORT() {
         return PORT;
     }
 
-    public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(Server.PORT);
-        Server server = new Server(serverSocket);
-        server.startServer();
-    }
+
 }

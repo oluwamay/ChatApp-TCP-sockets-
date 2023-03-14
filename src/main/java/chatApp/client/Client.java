@@ -1,4 +1,6 @@
-package chatApp;
+package chatApp.client;
+
+import chatApp.server.Server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,31 +15,28 @@ public class Client {
     private PrintWriter printWriter;
     private String userName;
 
-    public Client(Socket socket, String Username){
-        try{
+    public Client(Socket socket, String Username) {
+        try {
             this.socket = socket;
             this.bufferedReader = new BufferedReader(new InputStreamReader((socket.getInputStream())));
             this.printWriter = new PrintWriter(socket.getOutputStream(), true);
             this.userName = Username;
-        }catch(IOException e){
-            try {
-                if(socket != null){
-                socket.close();}
-                if(bufferedReader != null){bufferedReader.close();}
-            }catch(IOException ex){
-                ex.printStackTrace();
-            }
+        } catch (IOException e) {
+            close(socket, bufferedReader, printWriter);
         }
     }
 
-    public void sendMessage() throws IOException {
+    public void sendMessage(){
+        try {
             printWriter.println(userName); // This writes the username to the clienthandler constructor
-            Scanner scanner = new Scanner(System.in);//takes input from the console
-            while(socket.isConnected()){
-                String messageToSend = scanner.nextLine();
-                printWriter.println(userName +": "+messageToSend);
+            BufferedReader clientInput = new BufferedReader(new InputStreamReader(System.in));//takes input from the console
+            while (socket.isConnected()) {
+                String messageToSend = clientInput.readLine();
+                printWriter.println(userName + ": " + messageToSend);
             }
-            socket.close();
+        }catch(IOException e) {
+            close(socket, bufferedReader, printWriter);
+        }
     }
 
     public void receiveMessage(){
@@ -47,6 +46,8 @@ public class Client {
             String messageFromChat;
             while(socket.isConnected()){
                 try {
+                    //reads the broadcast message from client handler
+
                     messageFromChat = bufferedReader.readLine();
                     System.out.println(messageFromChat);
                 } catch (IOException e) {
@@ -63,18 +64,15 @@ public class Client {
         }).start();
     }
 
-    public static void main(String[] args) throws IOException {
-        //Takes input of the client's username
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter Username: ");
-        String username = scanner.nextLine();
-        //An instance of client's socket
-        Socket socket = new Socket("localhost", Server.getPORT());
-        //An instance of client class.
-        Client client = new Client(socket, username);
-        //The client has two basic functionalities; Listen for messages from other clients, and send messages to other clients
-        client.receiveMessage();
-        client.sendMessage();
-
+    private void close(Socket socket, BufferedReader bufferedReader, PrintWriter printWriter){
+        //this method is used to close the socket and streams of a disconnected client handler
+        try{
+            if(socket !=  null){ socket.close();}
+            if(bufferedReader != null){ bufferedReader.close();}
+            if(printWriter != null){printWriter.close();}
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
+
 }
