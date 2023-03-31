@@ -49,6 +49,10 @@ public class Client {
                     //reads the broadcast message from client handler
 
                     messageFromChat = bufferedReader.readLine();
+                    if(messageFromChat == null){
+                        System.out.println("Server downtime !!!");
+                        break;
+                    }
                     System.out.println(messageFromChat);
                 } catch (IOException e) {
                    try{

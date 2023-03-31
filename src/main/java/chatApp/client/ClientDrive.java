@@ -13,12 +13,14 @@ public class ClientDrive {
         System.out.print("Enter Username: ");
         String username = scanner.nextLine();
         //An instance of client's socket
-        Socket socket = new Socket("localhost", Server.getPORT());
+        Socket socket = new Socket("192.168.88.36", 6055);
         //An instance of client class.
         Client client = new Client(socket, username);
         //The client has two basic functionalities; Listen for messages from other clients, and send messages to other clients
         client.receiveMessage();
         client.sendMessage();
+
+
 
     }
 }
